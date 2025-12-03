@@ -7,7 +7,7 @@ import FooterLink from "@/components/forms/FooterLink";
 import InputField from "@/components/forms/InputField";
 import SelectField from "@/components/forms/SelectField";
 import { Button } from "@/components/ui/button";
-import { signupWithEmail } from "@/lib/actions/auth.actions";
+import { signUpWithEmail } from "@/lib/actions/auth.actions";
 import { INVESTMENT_GOALS, PREFERRED_INDUSTRIES, RISK_TOLERANCE_OPTIONS } from "@/lib/constants";
 import { toast } from "sonner";
 
@@ -33,7 +33,7 @@ const SignUp = () => {
 
   const onSubmit = async (data: SignUpFormData) => {
     try {
-      const result = await signupWithEmail(data);
+      const result = await signUpWithEmail(data);
       if (result.success) router.push("/");
     } catch (error) {
       console.error(error);
