@@ -1,14 +1,19 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
 import CountrySelectField from "@/components/forms/CountrySelectField";
 import FooterLink from "@/components/forms/FooterLink";
 import InputField from "@/components/forms/InputField";
 import SelectField from "@/components/forms/SelectField";
 import { Button } from "@/components/ui/button";
+import { signupWithEmail } from "@/lib/actions/auth.actions";
 import { INVESTMENT_GOALS, PREFERRED_INDUSTRIES, RISK_TOLERANCE_OPTIONS } from "@/lib/constants";
-import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 const SignUp = () => {
+  const router = useRouter();
+
   const {
     register,
     handleSubmit,
@@ -28,9 +33,13 @@ const SignUp = () => {
 
   const onSubmit = async (data: SignUpFormData) => {
     try {
-      console.log(data);
+      const result = await signupWithEmail(data);
+      if (result.success) router.push("/");
     } catch (error) {
       console.error(error);
+      toast.error("Sign up failed",{
+        description: error instanceof Error ? error.message : "Failed to create an account"
+      });
     }
   };
 
@@ -39,15 +48,6 @@ const SignUp = () => {
       <h1 className="form-title">SignUp & Personalize</h1>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-        <InputField 
-          name="fullName"
-          label="Full Name"
-          placeholder="John Doe"
-          register={register}
-          error={errors.fullName}
-          validation={{ required: "Full name is required", minLenght: 2 }}
-        />
-
         <InputField 
           name="fullName"
           label="Full Name"
