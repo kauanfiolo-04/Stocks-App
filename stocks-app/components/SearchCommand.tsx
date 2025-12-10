@@ -3,7 +3,11 @@
 import { useEffect, useState } from "react";
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "./ui/command";
 import { Button } from "./ui/button";
-import { Loader2, Star, TrendingUp } from "lucide-react";
+import { 
+  Loader2, 
+  // Star, 
+  TrendingUp
+} from "lucide-react";
 import Link from "next/link";
 import { searchStocks } from "@/lib/actions/finnhub.actions";
 import { useDebounce } from "@/hooks/useDebounce";
