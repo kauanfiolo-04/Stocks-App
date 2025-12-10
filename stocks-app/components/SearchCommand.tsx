@@ -3,22 +3,46 @@
 import { useEffect, useState } from "react";
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "./ui/command";
 import { Button } from "./ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, Star, TrendingUp } from "lucide-react";
 import Link from "next/link";
+import { searchStocks } from "@/lib/actions/finnhub.actions";
+import { useDebounce } from "@/hooks/useDebounce";
 
-const SearchCommand = ({ renderAs = "button", label = "Add Stock", initialStocks }: { renderAs: string, label: string, initialStocks: unknown[] }) => {
+const SearchCommand = ({ renderAs = "button", label = "Add Stock", initialStocks }: SearchCommandProps) => {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
-  const [stocks, setStocks] = useState(initialStocks);
+  const [stocks, setStocks] = useState<StockWithWatchlistStatus[]>(initialStocks);
   
   const isSearchMode = !!searchTerm.trim();
   const displayStocks = isSearchMode ? stocks : stocks?.slice(0, 10);
 
+  const handleSearch = async () => {
+    if (!isSearchMode) return setStocks(initialStocks);
+
+    setLoading(true);
+
+    try {
+      const results = await searchStocks(searchTerm.trim());
+      setStocks(results);
+    } catch {
+      setStocks([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const debouncedSearch = useDebounce(handleSearch, 300);
+
   const handleSelectStock = (value: string) => {
-    console.log("Stock selected");
     setOpen(false);
+    setSearchTerm("");
+    setStocks(initialStocks);
   }; 
+
+  useEffect(() => {
+    debouncedSearch();
+  }, [searchTerm]);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -63,16 +87,28 @@ const SearchCommand = ({ renderAs = "button", label = "Add Stock", initialStocks
             <ul>
               <div className="search-count">
                 {isSearchMode ? "Search results" : "Popular Stocks"}
-                {displayStocks?.length || 0}
+                {` `}({displayStocks?.length || 0})
               </div>
 
               {displayStocks?.map((stock, idx) => (
                 <li key={stock.symbol} className="search-item">
                   <Link 
                     href={`/stocks/${stock.symbol}`}
-                    onClick={handleSelectStock}
+                    onClick={() => { handleSelectStock(stock.name) }}
                     className="search-item-link"
-                  />
+                  >
+                    <TrendingUp className="h-4 w-4 text-gray-500" />
+
+                    <div className="flex-1">
+                      <div className="search-item-name">{stock.name}</div>
+
+                      <div className="text-sm text-gray-500">
+                        {stock.symbol} | {stock.exchange} | {stock.type}
+                      </div>
+                    </div>
+
+                    {/* <Star /> */}
+                  </Link>
                 </li>
               ))}
             </ul>
